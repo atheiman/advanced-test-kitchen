@@ -1,0 +1,50 @@
+---
+driver:
+  name: vagrant
+  network:
+    - ["private_network", { type: "dhcp" }]
+
+provisioner:
+  # nodes provisioner allows sharing node information among nodes using the `kitchen-nodes` gem
+  name: nodes
+  log_level: info
+  data_bags_path: test/fixtures/data_bags
+  nodes_path: test/fixtures/nodes
+  downloads:
+    /tmp/kitchen/data_bags: test/fixtures
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-16.04
+    run_list:
+      - recipe[hurry-up-and-test::set_non_nat_vbox_ip]
+
+suites:
+  - name: server
+    run_list:
+      - recipe[data_bag_example::server]
+  - name: client
+    run_list:
+      - recipe[data_bag_example::client]
+
+<% 
+  require 'kitchen'
+  require 'kitchen/provisioner/chef_zero'
+
+  module Kitchen
+    module Provisioner
+      # Patch kitchen-nodes to not delete node files before converge. This
+      # ensures all node files will be uploaded during concurrent provisions.
+      # https://github.com/mwrock/kitchen-nodes/blob/master/lib/kitchen/provisioner/nodes.rb
+      class Nodes < ChefZero
+        def create_sandbox
+          create_node
+        ensure
+          super
+        end
+      end
+    end
+  end
+%>
