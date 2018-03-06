@@ -1,0 +1,25 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: nodes
+  log_level: info
+  data_bags_path: test/fixtures/data_bags
+  nodes_path: test/fixtures/nodes
+  downloads:
+    /tmp/kitchen/data_bags: test/fixtures
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-16.04
+
+suites:
+  - name: server # defined before client so that it is converged before client
+    run_list:
+      - recipe[client_server_app::server]
+  - name: client
+    run_list:
+      - recipe[client_server_app::client]

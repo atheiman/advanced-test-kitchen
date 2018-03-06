@@ -17,3 +17,5 @@ bin/*
 
 test/fixtures/data_bags
 test/fixtures/nodes
+
+server-app/passenger*

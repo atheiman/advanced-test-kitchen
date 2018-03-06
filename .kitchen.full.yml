@@ -2,10 +2,11 @@
 driver:
   name: vagrant
   network:
+    # allows communication between nodes
     - ["private_network", { type: "dhcp" }]
 
 provisioner:
-  # nodes provisioner allows sharing node information among nodes using the `kitchen-nodes` gem
+  # nodes provisioner allows sharing node data among nodes using the `kitchen-nodes` gem
   name: nodes
   log_level: info
   data_bags_path: test/fixtures/data_bags
@@ -19,15 +20,16 @@ verifier:
 platforms:
   - name: ubuntu-16.04
     run_list:
+      # ensures ohai sets `node['ipaddress']` to the non-nat ip address
       - recipe[hurry-up-and-test::set_non_nat_vbox_ip]
 
 suites:
-  - name: server
+  - name: server # defined before client so that it is converged before client
     run_list:
-      - recipe[data_bag_example::server]
+      - recipe[client_server_app::server]
   - name: client
     run_list:
-      - recipe[data_bag_example::client]
+      - recipe[client_server_app::client]
 
 <% 
   require 'kitchen'
